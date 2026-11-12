@@ -1,0 +1,12 @@
+# macOS / Windows / Linux
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+
+# Node / Optional build artifacts
+node_modules/
+dist/

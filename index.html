@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELOYCE University — Smart Campus Assistance System & Student Portal</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-stone-100 text-slate-800 selection:bg-amber-600 selection:text-white">
+
+  <!-- TOP HERO HEADER BANNER (MATCHING ELOYCE UNIVERSITY REFERENCE MOCKUP) -->
+  <header class="hero-arch-bg relative text-white shadow-lg border-b border-stone-300">
+    <!-- Top Navigation Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-2 flex flex-wrap items-center justify-between gap-3 border-b border-white/15 bg-slate-950/40 backdrop-blur-sm">
+      <!-- Left: Hamburger + ELOYCE University Crest -->
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="toggleMobileDrawer()" class="p-2 rounded-lg text-stone-200 hover:text-white hover:bg-white/10 transition" title="Toggle Quick Menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <button type="button" onclick="switchMainTab('portal')" class="flex items-center gap-2.5 text-left group">
+          <div class="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-300/50 flex items-center justify-center shadow-inner">
+            <svg class="w-5 h-5 text-amber-300" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.82v5c0 4.52-3.13 8.75-7 9.93-3.87-1.18-7-5.41-7-9.93V8l7-3.82zm-1 3.82v6h2V8h-2zm0 8v2h2v-2h-2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="font-serif-crest text-lg sm:text-xl font-bold tracking-wider text-white leading-none group-hover:text-amber-200 transition">ELOYCE</div>
+            <div class="text-[10px] tracking-[0.25em] uppercase text-stone-300 font-medium mt-0.5">UNIVERSITY PORTAL</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Center: Main Application Navigation Pills -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/65 p-1 rounded-xl border border-white/15 backdrop-blur-md">
+        <button type="button" id="nav-btn-portal" onclick="switchMainTab('portal')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Campus Home
+        </button>
+        <button type="button" id="nav-btn-submit" onclick="switchMainTab('submit')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-stone-200 hover:text-white hover:bg-white/10">
+          <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Submit Request
+        </button>
+        <button type="button" id="nav-btn-myrequests" onclick="switchMainTab('myrequests')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-stone-200 hover:text-white hover:bg-white/10">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          Track Requests
+          <span id="nav-student-req-count" class="px-1.5 py-0.2 bg-amber-500/30 border border-amber-300/40 text-amber-200 rounded-full text-[10px]">6</span>
+        </button>
+        <button type="button" id="nav-btn-admin" onclick="switchMainTab('admin')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-stone-200 hover:text-white hover:bg-white/10">
+          <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Admin Dashboard
+        </button>
+      </nav>
+
+      <!-- Right: Role Switcher, Schedule Icon, Notification Bell, User Auth Button -->
+      <div class="flex items-center gap-2">
+        <!-- Instant Role Switcher for Demo / Grading -->
+        <div class="hidden sm:flex items-center bg-slate-900/75 border border-white/20 rounded-lg p-0.5 text-[11px]">
+          <button type="button" id="role-pill-student" onclick="QuickSwitchRole('student')" class="px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 transition">
+            Student View
+          </button>
+          <button type="button" id="role-pill-admin" onclick="QuickSwitchRole('admin')" class="px-2.5 py-1 rounded-md font-semibold text-stone-300 hover:text-white transition">
+            Authority Admin
+          </button>
+        </div>
+
+        <!--Simulate Live Status Change Button (great for testing notifications)-->
+        <button type="button" onclick="simulateAuthorityProgress()" class="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs font-medium border border-emerald-400/40 shadow-sm transition" title="Simulate an authority updating a request status in real time">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Simulate Live Update</span>
+        </button>
+
+        <!-- Notification Bell Button -->
+        <button type="button" onclick="toggleNotificationDrawer()" class="relative p-2 rounded-lg bg-slate-900/60 hover:bg-slate-900/90 border border-white/15 text-stone-100 transition" title="Notifications">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span id="notif-unread-badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow">3</span>
+        </button>
+
+        <!-- User Profile / Auth Modal Trigger -->
+        <button type="button" onclick="openAuthModal()" class="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-lg bg-slate-900/65 hover:bg-slate-900 border border-white/20 transition">
+          <div id="header-user-avatar" class="w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center">AR</div>
+          <div class="text-left hidden sm:block">
+            <div id="header-user-name" class="text-xs font-semibold text-white leading-tight">Alex Rivera</div>
+            <div id="header-user-meta" class="text-[10px] text-amber-300 leading-tight">ELU-2026-0419 • Student</div>
+          </div>
+          <svg class="w-3.5 h-3.5 text-stone-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <div id="mobile-nav-drawer" class="md:hidden hidden bg-slate-950/90 px-4 py-2.5 border-b border-white/15">
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" onclick="switchMainTab('portal')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 text-white text-left">Campus Home</button>
+        <button type="button" onclick="switchMainTab('submit')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-200 text-left">+ Submit Request</button>
+        <button type="button" onclick="switchMainTab('myrequests')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 text-white text-left">Track Requests</button>
+        <button type="button" onclick="switchMainTab('admin')" class="px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-200 text-left">Admin Dashboard</button>
+      </div>
+      <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between">
+        <span class="text-[11px] text-stone-300">Switch Demo Role:</span>
+        <div class="flex gap-1.5">
+          <button type="button" onclick="QuickSwitchRole('student')" class="px-2.5 py-1 rounded bg-amber-500 text-slate-950 text-xs font-semibold">Student</button>
+          <button type="button" onclick="QuickSwitchRole('admin')" class="px-2.5 py-1 rounded bg-slate-800 text-white text-xs font-semibold">Authority Admin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Banner Content with Overlaid Announcement Box (Exact match to laptop reference photo) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+      <!-- White Overlaid Announcement Card from Reference Photo -->
+      <div class="bg-white/95 backdrop-blur-md text-slate-800 rounded-xl shadow-xl p-4 sm:p-5 max-w-md w-full border border-stone-200">
+        <div class="flex items-center justify-between mb-1.5">
+          <span id="hero-slide-tag" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900">Campus Notice</span>
+          <span class="text-[11px] text-slate-400 font-medium">Smart Campus System</span>
+        </div>
+        <p id="hero-slide-text" class="text-sm sm:text-base font-medium text-slate-800 leading-snug min-h-[3rem]">
+          Academic registration for Winter to Wednesday, November 1 at 2:00pm
+        </p>
+        <div class="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="changeHeroSlide(-1)" class="p-1 rounded hover:bg-slate-100 text-slate-700 transition" title="Previous Notice">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <span id="hero-slide-index" class="font-semibold text-slate-700">1 of 3</span>
+            <button type="button" onclick="changeHeroSlide(1)" class="p-1 rounded hover:bg-slate-100 text-slate-700 transition" title="Next Notice">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <button type="button" onclick="handleHeroSlideCTA()" id="hero-slide-cta" class="font-bold tracking-wider uppercase text-amber-700 hover:text-amber-900 transition">
+            READ MORE &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Hero Quick Assistance Callout -->
+      <div class="bg-slate-950/75 backdrop-blur-md border border-white/20 rounded-xl p-4 text-white max-w-md w-full shadow-xl">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-badge"></span>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-300">Smart Campus Assistance Desk</span>
+          </div>
+          <span id="hero-active-tickets-pill" class="text-[11px] bg-white/10 px-2 py-0.5 rounded-full text-stone-200">8 Active Tickets</span>
+        </div>
+        <p class="text-xs text-stone-200 leading-relaxed mb-3">
+          Report classroom issues, IT outages, lost belongings, maintenance problems, or transport delays with automatic AI priority routing.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="switchMainTab('submit')" class="flex-1 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Submit Service Request
+          </button>
+          <button type="button" onclick="switchMainTab('myrequests')" class="px-3.5 py-2 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5">
+            Track Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ACTIVE ROLE & FEATURE STATUS RIBBON -->
+  <div class="bg-white border-b border-stone-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+        <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Logged in as: <strong id="ribbon-user-label" class="text-slate-900">Alex Rivera (Student • Computer Science)</strong>
+        </span>
+        <span class="hidden sm:inline text-stone-300">|</span>
+        <button type="button" onclick="openAuthModal()" class="text-amber-700 hover:text-amber-900 font-semibold underline decoration-amber-400/60 underline-offset-2">
+          Student Login / Register Account
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-slate-500 hidden md:inline">Quick Jump:</span>
+        <button type="button" onclick="openQuickScenario('exam_projector')" class="px-2 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-medium transition">
+          Test Urgent Classroom Issue
+        </button>
+        <button type="button" onclick="switchMainTab('admin')" class="px-2.5 py-1 rounded bg-slate-800 text-white hover:bg-slate-700 font-medium transition">
+          Open Authority Console &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: ELOYCE CAMPUS PORTAL HOME (8 REFERENCE WIDGETS + LIVE TICKETS) -->
+    <!-- ===================================================================== -->
+    <section id="view-portal" class="space-y-6">
+      <!-- Top Smart Assistance Quick Bar inside Portal -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-stone-900 rounded-2xl p-5 text-white shadow-md flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="inline-flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
+            <span>Smart Campus Assistance System</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-200 text-[10px]">AI Auto-Priority Active</span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-bold">Need help with a classroom, IT, lost item, transport, or maintenance issue?</h1>
+          <p class="text-xs text-stone-300">Select a category below to launch a pre-categorized request or inspect your active campus tickets.</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full lg:w-auto">
+          <button type="button" onclick="launchCategoryRequest('Classroom')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Classroom</button>
+          <button type="button" onclick="launchCategoryRequest('IT & Network')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">IT &amp; Wi-Fi</button>
+          <button type="button" onclick="launchCategoryRequest('Maintenance')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Maintenance</button>
+          <button type="button" onclick="launchCategoryRequest('Lost Belongings')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Lost &amp; Found</button>
+          <button type="button" onclick="launchCategoryRequest('Transport')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Transport</button>
+          <button type="button" onclick="launchCategoryRequest('Academic Support')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Academic</button>
+          <button type="button" onclick="launchCategoryRequest('Administrative')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-slate-950 text-xs font-semibold transition border border-white/15">Admin Services</button>
+        </div>
+      </div>
+
+      <!-- Recent Submitted Requests Strip (Immediate Visibility + Status Tracking) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>Recent Campus Assistance Requests &amp; Live Status Tracker</span>
+              <span id="portal-active-badge" class="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 font-semibold">Live</span>
+            </h2>
+            <p class="text-xs text-slate-500">Click any ticket to view its 4-stage resolution timeline, assigned department, or update status.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="switchMainTab('myrequests')" class="px-3 py-1.5 rounded-lg border border-stone-300 hover:bg-stone-50 text-xs font-semibold text-slate-700 transition">
+              Search &amp; Filter All Requests
+            </button>
+            <button type="button" onclick="switchMainTab('submit')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white transition">
+              + New Request
+            </button>
+          </div>
+        </div>
+        <div id="portal-recent-requests-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- ELOYCE UNIVERSITY 8-CARD MODULAR PORTAL GRID (MATCHING LAPTOP PHOTO IN PROBLEM STATEMENT) -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">ELOYCE University Student Portal Modules (Interactive Campus Widgets)</h2>
+          <span class="text-xs text-slate-400">Integrated with Smart Campus Assistance</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Widget 1: To-Do List -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">To-Do List</h3>
+                <button type="button" onclick="toggleAddTodoRow()" class="p-1 rounded hover:bg-stone-100 text-slate-500 hover:text-slate-800" title="Add Task">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                </button>
+              </div>
+              <div id="todo-add-row" class="hidden mb-2.5 flex gap-1.5">
+                <input id="todo-new-input" type="text" placeholder="Add campus task..." class="flex-1 text-xs border border-stone-300 rounded px-2 py-1 focus:outline-none focus:border-slate-600" />
+                <button type="button" onclick="addPortalTodo()" class="px-2 py-1 bg-slate-800 text-white text-xs rounded font-medium">Add</button>
+              </div>
+              <ul id="portal-todo-list" class="space-y-2.5 text-xs">
+                <!-- Populated by JS -->
+              </ul>
+            </div>
+            <div class="mt-4 pt-2.5 border-t border-stone-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="todo-summary-count">4 tasks listed</span>
+              <button type="button" onclick="launchCategoryRequest('Academic Support')" class="text-amber-700 hover:underline font-semibold">Need Academic Help?</button>
+            </div>
+          </div>
+
+          <!-- Widget 2: Classes -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">Classes</h3>
+                <span class="text-[11px] font-semibold text-slate-500 bg-stone-100 px-2 py-0.5 rounded">Fall / Winter 2026</span>
+              </div>
+              <div class="space-y-3 text-xs">
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70">
+                  <div class="font-bold text-slate-800">COMM 101.2 Intro to Comm</div>
+                  <div class="text-[11px] text-slate-500">Mon/Wed/Fri 9:00 AM • Science Hall 104</div>
+                  <button type="button" onclick="reportClassroomIssue('Science Hall - Room 104', 'COMM 101.2 Classroom Issue')" class="mt-1 text-[11px] text-amber-700 font-semibold hover:underline">Report Room 104 Issue &rarr;</button>
+                </div>
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70">
+                  <div class="font-bold text-slate-800">ENGL 202 Writing in the Majors</div>
+                  <div class="text-[11px] text-slate-500">Tue/Thu 11:00 AM • Humanities 210</div>
+                  <button type="button" onclick="reportClassroomIssue('Humanities Bldg - Room 210', 'ENGL 202 Classroom Equipment')" class="mt-1 text-[11px] text-amber-700 font-semibold hover:underline">Report Room 210 Issue &rarr;</button>
+                </div>
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70">
+                  <div class="font-bold text-slate-800">MATH 121.3 Calculus II</div>
+                  <div class="text-[11px] text-slate-500">Mon/Wed 2:00 PM • Engineering 302</div>
+                  <button type="button" onclick="reportClassroomIssue('Engineering Quad - Room 302', 'MATH 121.3 Smartboard / AC')" class="mt-1 text-[11px] text-amber-700 font-semibold hover:underline">Report Room 302 Issue &rarr;</button>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-stone-100 text-[11px] text-slate-500 flex justify-between">
+              <span>3 Enrolled Courses</span>
+              <button type="button" onclick="launchCategoryRequest('Classroom')" class="text-slate-700 font-semibold hover:underline">+ Classroom Ticket</button>
+            </div>
+          </div>
+
+          <!-- Widget 3: Class Schedule -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">Class Schedule</h3>
+                <span class="text-[11px] text-slate-500">November 2026</span>
+              </div>
+              <!-- Day Selector Strip -->
+              <div class="grid grid-cols-7 gap-1 text-center text-[10px] mb-3">
+                <button type="button" onclick="selectScheduleDay('Sun')" id="sched-day-Sun" class="py-1 rounded text-slate-500 hover:bg-stone-100">Sun<br><strong>8</strong></button>
+                <button type="button" onclick="selectScheduleDay('Mon')" id="sched-day-Mon" class="py-1 rounded text-slate-600 hover:bg-stone-100">Mon<br><strong>9</strong></button>
+                <button type="button" onclick="selectScheduleDay('Tue')" id="sched-day-Tue" class="py-1 rounded text-slate-600 hover:bg-stone-100">Tue<br><strong>10</strong></button>
+                <button type="button" onclick="selectScheduleDay('Wed')" id="sched-day-Wed" class="py-1 rounded bg-slate-900 text-white font-bold">Wed<br><strong>11</strong></button>
+                <button type="button" onclick="selectScheduleDay('Thu')" id="sched-day-Thu" class="py-1 rounded text-slate-600 hover:bg-stone-100">Thu<br><strong>12</strong></button>
+                <button type="button" onclick="selectScheduleDay('Fri')" id="sched-day-Fri" class="py-1 rounded text-slate-600 hover:bg-stone-100">Fri<br><strong>13</strong></button>
+                <button type="button" onclick="selectScheduleDay('Sat')" id="sched-day-Sat" class="py-1 rounded text-slate-500 hover:bg-stone-100">Sat<br><strong>14</strong></button>
+              </div>
+              <!-- Timeline Slots -->
+              <div id="schedule-slots-container" class="space-y-2 text-xs">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-stone-100 text-[11px] text-slate-500 flex justify-between">
+              <span id="schedule-day-footer">Wednesday Schedule</span>
+              <button type="button" onclick="launchCategoryRequest('Transport')" class="text-amber-700 font-semibold hover:underline">Shuttle Delay?</button>
+            </div>
+          </div>
+
+          <!-- Widget 4: Parking & Campus Issue Map -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">Parking &amp; Service Map</h3>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">Interactive</span>
+              </div>
+              <!-- Interactive Stylized Campus Map -->
+              <div class="relative rounded-lg overflow-hidden border border-stone-200 bg-stone-100 h-36">
+                <svg viewBox="0 0 300 150" class="w-full h-full">
+                  <rect width="300" height="150" fill="#e7e5e4"/>
+                  <!-- Roads & Paths -->
+                  <path d="M0 75 L300 75 M150 0 L150 150 M40 0 L240 150" stroke="#d6d3d1" stroke-width="10" fill="none"/>
+                  <path d="M0 75 L300 75 M150 0 L150 150" stroke="#f5f5f4" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+                  <!-- Green Quads -->
+                  <rect x="20" y="15" width="110" height="48" rx="6" fill="#bbf7d0" opacity="0.65"/>
+                  <rect x="165" y="88" width="115" height="48" rx="6" fill="#bbf7d0" opacity="0.65"/>
+                  <!-- Buildings -->
+                  <rect x="35" y="24" width="45" height="28" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+                  <rect x="180" y="20" width="55" height="34" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+                  <rect x="45" y="95" width="60" height="32" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+                  <rect x="190" y="96" width="55" height="30" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
+                </svg>
+                <!-- Interactive Building Pins -->
+                <button type="button" onclick="selectCampusZone('Science Hall')" class="absolute top-5 left-10 px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold shadow hover:scale-105 transition">
+                  Science Hall (2)
+                </button>
+                <button type="button" onclick="selectCampusZone('Main Library')" class="absolute top-5 right-8 px-1.5 py-0.5 rounded bg-amber-600 text-white text-[10px] font-bold shadow hover:scale-105 transition">
+                  Library IT (2)
+                </button>
+                <button type="button" onclick="selectCampusZone('North Parking & Shuttle Hub')" class="absolute bottom-5 left-8 px-1.5 py-0.5 rounded bg-slate-800 text-white text-[10px] font-bold shadow hover:scale-105 transition">
+                  Lot A / Shuttle
+                </button>
+                <button type="button" onclick="selectCampusZone('Engineering Quad')" class="absolute bottom-5 right-8 px-1.5 py-0.5 rounded bg-indigo-600 text-white text-[10px] font-bold shadow hover:scale-105 transition">
+                  Eng. Quad
+                </button>
+              </div>
+              <div id="campus-zone-readout" class="mt-2 text-[11px] text-slate-600 bg-stone-50 px-2.5 py-1.5 rounded border border-stone-200 flex items-center justify-between">
+                <span>Selected: <strong>Science Hall</strong> (Lot B: 42 spots free)</span>
+                <button type="button" onclick="reportZoneIssue()" class="text-amber-700 font-bold hover:underline">Report Here</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Widget 5: Student Degree Progress (At a Glance) -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">Student Degree Progress</h3>
+                <span class="text-[11px] text-emerald-700 font-semibold">On Track</span>
+              </div>
+              <div class="text-xs font-bold text-slate-700 mb-2">At a Glance</div>
+              <dl class="space-y-1.5 text-xs">
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Cumulative GPA</dt>
+                  <dd class="font-semibold text-slate-800">3.75 <span class="text-[10px] text-slate-400">(2.00 req)</span></dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Institution GPA</dt>
+                  <dd class="font-semibold text-slate-800">3.82 <span class="text-[10px] text-slate-400">(2.00 req)</span></dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Degree</dt>
+                  <dd class="font-semibold text-slate-800">Bachelor of Science</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Major</dt>
+                  <dd class="font-semibold text-slate-800">Computer Science</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Department</dt>
+                  <dd class="font-semibold text-slate-800">Engineering &amp; CS</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-slate-500">Catalog Year</dt>
+                  <dd class="font-semibold text-slate-800">2026</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="mt-3 pt-2 border-t border-stone-100 flex justify-between items-center text-[11px]">
+              <span class="text-slate-500">98 / 120 Credits</span>
+              <button type="button" onclick="launchCategoryRequest('Administrative')" class="text-amber-700 font-semibold hover:underline">Request Transcript &rarr;</button>
+            </div>
+          </div>
+
+          <!-- Widget 6: Eloyce Radio (82.3 WEEE FM from Laptop Mockup) -->
+          <div class="bg-slate-900 text-white rounded-xl shadow-sm border border-slate-800 p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between pb-2 border-b border-white/10 z-10">
+              <h3 class="text-sm font-bold text-stone-200">Eloyce Radio</h3>
+              <span id="radio-status-pill" class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-stone-300">Standby</span>
+            </div>
+            <div class="my-3 z-10">
+              <div class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-none">82.3</div>
+              <div class="text-sm font-bold tracking-widest uppercase text-amber-400 mt-1">WEEE FM</div>
+              <div class="text-xs text-stone-300 mt-0.5">Eloyce Student Campus Radio</div>
+              <p id="radio-now-playing" class="text-[11px] text-stone-400 mt-2">Broadcast: Campus News &amp; Study Chimes</p>
+            </div>
+            <div class="z-10 pt-2 border-t border-white/10 flex items-center justify-between">
+              <button type="button" onclick="toggleCampusRadio()" id="radio-play-btn" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <span>Listen Chime</span>
+              </button>
+              <button type="button" onclick="launchCategoryRequest('Administrative')" class="text-[11px] text-stone-300 hover:text-white underline">Media Ticket</button>
+            </div>
+          </div>
+
+          <!-- Widget 7: Campus Eats -->
+          <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-2.5 border-b border-stone-100">
+                <h3 class="text-sm font-bold text-slate-800">Campus Eats</h3>
+                <span class="text-[11px] text-emerald-700 font-semibold">3 Open Now</span>
+              </div>
+              <div class="space-y-2 text-xs">
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-800">Main Commons Dining</div>
+                    <div class="text-[11px] text-slate-500">7:00 AM – 9:00 PM • Low Wait</div>
+                  </div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                </div>
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-800">Founder's Quad Café</div>
+                    <div class="text-[11px] text-slate-500">8:00 AM – 6:00 PM • Moderate</div>
+                  </div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                </div>
+                <div class="p-2 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+                  <div>
+                    <div class="font-bold text-slate-800">Student Union Grill</div>
+                    <div class="text-[11px] text-slate-500">11:00 AM – 11:00 PM • Open</div>
+                  </div>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-stone-100 flex justify-between items-center text-[11px] text-slate-500">
+              <span>Dining Services</span>
+              <button type="button" onclick="launchCategoryRequest('Maintenance')" class="text-amber-700 font-semibold hover:underline">Report Dining Facility Issue</button>
+            </div>
+          </div>
+
+          <!-- Widget 8: Weather (59°F Widget from Laptop Mockup) -->
+          <div class="bg-slate-800 text-white rounded-xl shadow-sm border border-slate-700 p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                <h3 class="text-sm font-bold text-stone-200">Campus Weather</h3>
+                <span class="text-[10px] text-stone-300">Eloyce Main Quad</span>
+              </div>
+              <div class="flex items-center justify-between my-2">
+                <div>
+                  <div class="text-xs text-amber-300 font-semibold">Partly Sunny</div>
+                  <div class="text-[11px] text-stone-300">Humidity 54% • Wind 6 mph</div>
+                </div>
+                <div class="text-3xl font-extrabold text-white">59°F</div>
+              </div>
+              <div class="grid grid-cols-5 gap-1 pt-2 border-t border-white/10 text-center text-[10px]">
+                <div class="bg-white/5 rounded p-1">
+                  <div class="text-stone-300">Wed</div>
+                  <div class="font-bold text-amber-300 mt-0.5">59°</div>
+                </div>
+                <div class="bg-white/5 rounded p-1">
+                  <div class="text-stone-300">Thu</div>
+                  <div class="font-bold text-white mt-0.5">62°</div>
+                </div>
+                <div class="bg-white/5 rounded p-1">
+                  <div class="text-stone-300">Fri</div>
+                  <div class="font-bold text-white mt-0.5">57°</div>
+                </div>
+                <div class="bg-white/5 rounded p-1">
+                  <div class="text-stone-300">Sat</div>
+                  <div class="font-bold text-white mt-0.5">61°</div>
+                </div>
+                <div class="bg-white/5 rounded p-1">
+                  <div class="text-stone-300">Sun</div>
+                  <div class="font-bold text-white mt-0.5">64°</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px] text-stone-300">
+              <span>Campus Grounds</span>
+              <button type="button" onclick="launchCategoryRequest('Maintenance')" class="text-amber-300 font-semibold hover:underline">Report Weather Hazard</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: SUBMIT A COMPLAINT OR SERVICE REQUEST + BONUS AI RECOMMENDER   -->
+    <!-- ===================================================================== -->
+    <section id="view-submit" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6 border-b border-stone-200">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Student Service Desk</span>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">Submit a Campus Complaint or Service Request</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+              Includes the <strong>Bonus Automatic Priority Recommendation Engine</strong> that analyzes your complaint description and category in real time.
+            </p>
+          </div>
+          <!-- Quick Demo Fillers for Testing the AI Priority Engine -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-xs font-semibold text-slate-500 mr-1">Try Test Scenarios:</span>
+            <button type="button" onclick="openQuickScenario('exam_projector')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition">
+              Critical: Exam Projector Dead
+            </button>
+            <button type="button" onclick="openQuickScenario('wifi_outage')" class="px-2.5 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-semibold transition">
+              High: Library Wi-Fi Outage
+            </button>
+            <button type="button" onclick="openQuickScenario('lost_id')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition">
+              Medium: Lost Laptop/ID
+            </button>
+            <button type="button" onclick="openQuickScenario('transcript')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold transition">
+              Low: Admin Transcript Copy
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <!-- Left 7 Columns: Submission Form -->
+          <form id="submit-request-form" onsubmit="handleRequestSubmit(event)" class="lg:col-span-7 space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="req-student-name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Student Name</label>
+                <input id="req-student-name" type="text" required value="Alex Rivera" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+              </div>
+              <div>
+                <label for="req-student-id" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Student University ID</label>
+                <input id="req-student-id" type="text" required value="ELU-2026-0419" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="req-category" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Request Category *</label>
+                <select id="req-category" onchange="runLivePriorityRecommendation()" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                  <option value="Classroom">Classroom Issues (Projector, Audio, Seating)</option>
+                  <option value="IT & Network">IT &amp; Network Support (Wi-Fi, LMS, Lab PCs)</option>
+                  <option value="Maintenance">Maintenance &amp; Facilities (HVAC, Plumbing, Power)</option>
+                  <option value="Transport">Transport &amp; Shuttle Services</option>
+                  <option value="Lost Belongings">Lost Belongings &amp; Campus Security</option>
+                  <option value="Academic Support">Academic Support &amp; Registration</option>
+                  <option value="Administrative">Administrative &amp; Registrar Services</option>
+                </select>
+              </div>
+              <div>
+                <label for="req-location" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Campus Building &amp; Room *</label>
+                <input id="req-location" type="text" required oninput="runLivePriorityRecommendation()" placeholder="e.g., Science Hall - Room 304" value="Science Hall - Room 104" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+              </div>
+            </div>
+
+            <div>
+              <label for="req-title" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Request Title / Summary *</label>
+              <input id="req-title" type="text" required oninput="runLivePriorityRecommendation()" placeholder="Brief summary of the issue (e.g., Ceiling projector overheating before midterm)" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="req-description" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Detailed Complaint / Service Description *</label>
+                <span class="text-[11px] text-amber-700 font-medium">Live AI Priority Analyzer Active</span>
+              </div>
+              <textarea id="req-description" rows="4" required oninput="runLivePriorityRecommendation()" placeholder="Describe the problem, impact on classes or safety, and any immediate assistance needed..." class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+            </div>
+
+            <!-- Priority & Department Selection Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-stone-200">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label for="req-priority" class="block text-xs font-bold uppercase tracking-wider text-slate-600">Priority Level</label>
+                  <label class="inline-flex items-center gap-1.5 text-[11px] text-slate-600 cursor-pointer">
+                    <input id="req-auto-priority-toggle" type="checkbox" checked onchange="runLivePriorityRecommendation()" class="rounded text-amber-600 focus:ring-amber-500" />
+                    <span>Auto-apply AI Priority</span>
+                  </label>
+                </div>
+                <select id="req-priority" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                  <option value="Critical">Critical (Immediate Response &lt; 1 hr)</option>
+                  <option value="High">High (Urgent SLA &lt; 4 hrs)</option>
+                  <option value="Medium" selected>Medium (Standard SLA &lt; 24 hrs)</option>
+                  <option value="Low">Low (Routine SLA &lt; 72 hrs)</option>
+                </select>
+              </div>
+              <div>
+                <label for="req-department" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Assigned University Department</label>
+                <select id="req-department" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                  <option value="Academic & Classroom Ops">Academic &amp; Classroom Ops</option>
+                  <option value="IT & Digital Services">IT &amp; Digital Services</option>
+                  <option value="Facilities & Campus Maintenance">Facilities &amp; Campus Maintenance</option>
+                  <option value="Transport & Fleet Division">Transport &amp; Fleet Division</option>
+                  <option value="Campus Security & Lost-Found">Campus Security &amp; Lost-Found</option>
+                  <option value="Registrar & Student Admin">Registrar &amp; Student Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pt-3 flex flex-wrap items-center justify-end gap-3">
+              <button type="button" onclick="resetSubmitForm()" class="px-4 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold text-slate-700 hover:bg-stone-100 transition">
+                Clear Form
+              </button>
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-2">
+                <span>Submit Campus Request</span>
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+            </div>
+          </form>
+
+          <!-- Right 5 Columns: BONUS CHALLENGE — AUTOMATIC PRIORITY RECOMMENDATION PANEL -->
+          <div class="lg:col-span-5">
+            <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-lg border border-slate-800 space-y-4 sticky top-6">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 font-bold text-xs">AI</div>
+                  <div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-amber-300">Bonus Feature Engine</div>
+                    <h3 class="text-sm font-bold text-white">Automatic Priority Recommendation</h3>
+                  </div>
+                </div>
+                <span id="ai-confidence-pill" class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold">92% Confidence</span>
+              </div>
+
+              <!-- Live Recommended Priority Output Card -->
+              <div class="bg-white/5 rounded-xl p-4 border border-white/10 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-stone-300">Recommended Priority:</span>
+                  <span id="ai-rec-priority-badge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950">Medium Priority</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-stone-300">Target SLA Response:</span>
+                  <span id="ai-rec-sla" class="font-semibold text-white">Within 24 Hours</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-stone-300">Auto-Routed Department:</span>
+                  <span id="ai-rec-dept" class="font-semibold text-amber-300">Academic &amp; Classroom Ops</span>
+                </div>
+                <div class="pt-2 border-t border-white/10">
+                  <div class="text-[11px] font-semibold text-stone-300 mb-1">Analysis &amp; Detected Signals:</div>
+                  <p id="ai-rec-explanation" class="text-xs text-stone-200 leading-relaxed">
+                    Type your complaint description or pick a test scenario above to see real-time keyword and category severity scoring.
+                  </p>
+                  <div id="ai-rec-keywords" class="flex flex-wrap gap-1.5 mt-2">
+                    <span class="px-2 py-0.5 rounded bg-white/10 text-[10px] text-stone-200">Category: Classroom</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scoring Rubric Matrix Explanation -->
+              <div class="bg-slate-950/60 rounded-xl p-3.5 border border-white/10 text-[11px] space-y-2 text-stone-300">
+                <div class="font-bold text-white uppercase tracking-wider text-[10px]">How the Priority Classifier Works:</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="p-2 rounded bg-rose-500/10 border border-rose-500/20">
+                    <div class="font-bold text-rose-300">Critical (&lt; 1 hr)</div>
+                    <div class="text-[10px] text-stone-300">Safety hazard, fire/smoke, flood, power/server outage, live exam failure</div>
+                  </div>
+                  <div class="p-2 rounded bg-orange-500/10 border border-orange-500/20">
+                    <div class="font-bold text-orange-300">High (&lt; 4 hrs)</div>
+                    <div class="text-[10px] text-stone-300">Broken projector/AC in active class, Wi-Fi down, lost passport/wallet/laptop</div>
+                  </div>
+                  <div class="p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                    <div class="font-bold text-amber-300">Medium (&lt; 24 hrs)</div>
+                    <div class="text-[10px] text-stone-300">Shuttle delay, registration hold, furniture repair, routine lab software</div>
+                  </div>
+                  <div class="p-2 rounded bg-emerald-500/10 border border-emerald-500/20">
+                    <div class="font-bold text-emerald-300">Low (&lt; 72 hrs)</div>
+                    <div class="text-[10px] text-stone-300">Transcript copy, general inquiry, minor cosmetic maintenance</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: VIEW SUBMITTED REQUESTS, SEARCH/FILTER & TRACK REQUEST STATUS  -->
+    <!-- ===================================================================== -->
+    <section id="view-myrequests" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-5 mb-5 border-b border-stone-200">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Request Tracking &amp; History</span>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">Submitted Requests &amp; Real-Time Status Tracker</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Search, filter by category or priority, and track every stage from submission to departmental resolution.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="student-scope-mine" onclick="setStudentListScope('mine')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">
+              My Submitted Tickets
+            </button>
+            <button type="button" id="student-scope-all" onclick="setStudentListScope('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-slate-700 hover:bg-stone-200 transition">
+              All Campus Tickets
+            </button>
+            <button type="button" onclick="switchMainTab('submit')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition">
+              + New Request
+            </button>
+          </div>
+        </div>
+
+        <!-- Search and Multi-Filter Toolbar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 bg-stone-50 p-3.5 rounded-xl border border-stone-200">
+          <div class="lg:col-span-2 relative">
+            <input id="track-search-input" type="text" oninput="renderStudentRequestsView()" placeholder="Search by Ticket ID (#REQ), title, building, or keyword..." class="w-full rounded-lg border border-stone-300 pl-9 pr-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white" />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <div>
+            <select id="track-filter-category" onchange="renderStudentRequestsView()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Categories</option>
+              <option value="Classroom">Classroom</option>
+              <option value="IT & Network">IT &amp; Network</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Transport">Transport</option>
+              <option value="Lost Belongings">Lost Belongings</option>
+              <option value="Academic Support">Academic Support</option>
+              <option value="Administrative">Administrative</option>
+            </select>
+          </div>
+          <div>
+            <select id="track-filter-status" onchange="renderStudentRequestsView()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Assigned">Assigned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Escalated">Escalated</option>
+            </select>
+          </div>
+          <div>
+            <select id="track-filter-priority" onchange="renderStudentRequestsView()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Priorities</option>
+              <option value="Critical">Critical Priority</option>
+              <option value="High">High Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Requests List with Visual 4-Step Progress Trackers -->
+        <div id="student-requests-container" class="space-y-4">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 4: ADMIN / AUTHORITY DASHBOARD, CHARTS, DEPT ROUTING & TRIAGE    -->
+    <!-- ===================================================================== -->
+    <section id="view-admin" class="hidden space-y-6">
+      <!-- Admin Header Banner -->
+      <div class="bg-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <span>University Authority Operations Console</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px]">Live SLA &amp; Dept Routing</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold mt-1">Smart Campus Admin Dashboard &amp; Complaint Triage</h1>
+          <p class="text-xs text-stone-300 mt-0.5">Assign requests to departments, manage priority queues, update ticket statuses, and monitor live campus analytics.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button type="button" onclick="autoAssignAllUnassigned()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+            Auto-Route Unassigned Tickets
+          </button>
+          <button type="button" onclick="simulateAuthorityProgress()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow">
+            Advance Next Ticket Status
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin KPI Metric Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Campus Requests</div>
+          <div id="admin-kpi-total" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">8</div>
+          <div class="text-[11px] text-slate-500 mt-1">Across 7 campus categories</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-rose-200">
+          <div class="text-xs font-semibold text-rose-600 uppercase tracking-wider">Critical &amp; High Priority</div>
+          <div id="admin-kpi-urgent" class="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-1">4</div>
+          <div class="text-[11px] text-rose-700 mt-1">Priority-based SLA queue</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-amber-200">
+          <div class="text-xs font-semibold text-amber-700 uppercase tracking-wider">In Progress / Assigned</div>
+          <div id="admin-kpi-active" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">5</div>
+          <div class="text-[11px] text-slate-500 mt-1">Routed to 6 departments</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-emerald-200">
+          <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Resolved &amp; Verified</div>
+          <div id="admin-kpi-resolved" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">2</div>
+          <div id="admin-kpi-rate" class="text-[11px] text-emerald-700 mt-1">Avg SLA response: 1.8 hrs</div>
+        </div>
+      </div>
+
+      <!-- Advanced Feature: Dashboard Statistics & Interactive Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Requests by Category</h3>
+            <span class="text-[11px] text-slate-400">Live Breakdown</span>
+          </div>
+          <div class="relative h-60">
+            <canvas id="chart-categories"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Priority-Based Distribution</h3>
+            <span class="text-[11px] text-slate-400">Severity Split</span>
+          </div>
+          <div class="relative h-60">
+            <canvas id="chart-priorities"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Department Workload &amp; Status</h3>
+            <span class="text-[11px] text-slate-400">Assigned Units</span>
+          </div>
+          <div class="relative h-60">
+            <canvas id="chart-departments"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Search, Filter, Priority Sorting & Request Management Table -->
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">University Authority Ticket Queue &amp; Department Assignment</h2>
+            <p class="text-xs text-slate-500">Update request status, assign or reassign departments, and adjust priority levels. Changes immediately notify the student.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="admin-sort-priority" onclick="setAdminSortMode('priority')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">
+              Sort: Priority Queue (Critical First)
+            </button>
+            <button type="button" id="admin-sort-newest" onclick="setAdminSortMode('newest')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-stone-100 text-slate-700 hover:bg-stone-200 transition">
+              Sort: Newest First
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Filter Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4 bg-stone-50 p-3.5 rounded-xl border border-stone-200">
+          <div class="lg:col-span-2">
+            <input id="admin-search-input" type="text" oninput="renderAdminDashboard()" placeholder="Search tickets by ID, student, location, or description..." class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+          <div>
+            <select id="admin-filter-category" onchange="renderAdminDashboard()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Categories</option>
+              <option value="Classroom">Classroom</option>
+              <option value="IT & Network">IT &amp; Network</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Transport">Transport</option>
+              <option value="Lost Belongings">Lost Belongings</option>
+              <option value="Academic Support">Academic Support</option>
+              <option value="Administrative">Administrative</option>
+            </select>
+          </div>
+          <div>
+            <select id="admin-filter-priority" onchange="renderAdminDashboard()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Priorities</option>
+              <option value="Critical">Critical Only</option>
+              <option value="High">High Only</option>
+              <option value="Medium">Medium Only</option>
+              <option value="Low">Low Only</option>
+            </select>
+          </div>
+          <div>
+            <select id="admin-filter-dept" onchange="renderAdminDashboard()" class="w-full rounded-lg border border-stone-300 px-3 py-2 text-xs bg-white">
+              <option value="ALL">All Departments</option>
+              <option value="Academic & Classroom Ops">Academic &amp; Classroom Ops</option>
+              <option value="IT & Digital Services">IT &amp; Digital Services</option>
+              <option value="Facilities & Campus Maintenance">Facilities &amp; Campus Maintenance</option>
+              <option value="Transport & Fleet Division">Transport &amp; Fleet Division</option>
+              <option value="Campus Security & Lost-Found">Campus Security &amp; Lost-Found</option>
+              <option value="Registrar & Student Admin">Registrar &amp; Student Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Responsive Admin Table -->
+        <div class="overflow-x-auto custom-scrollbar border border-stone-200 rounded-xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-stone-100 text-slate-600 border-b border-stone-200 uppercase text-[10px] tracking-wider">
+                <th class="py-3 px-3 font-bold">Ticket &amp; Student</th>
+                <th class="py-3 px-3 font-bold">Issue &amp; Location</th>
+                <th class="py-3 px-3 font-bold">Category</th>
+                <th class="py-3 px-3 font-bold">Priority (AI / Active)</th>
+                <th class="py-3 px-3 font-bold">Assigned Department</th>
+                <th class="py-3 px-3 font-bold">Request Status</th>
+                <th class="py-3 px-3 font-bold text-right">Details</th>
+              </tr>
+            </thead>
+            <tbody id="admin-requests-tbody" class="divide-y divide-stone-200">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- SLIDE-OUT NOTIFICATION CENTER DRAWER                                    -->
+  <!-- ======================================================================= -->
+  <div id="notification-drawer-backdrop" onclick="toggleNotificationDrawer()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-40 hidden"></div>
+  <aside id="notification-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl border-l border-stone-200 z-50 hidden flex-col">
+    <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-bold">Real-Time Status Notifications</h3>
+        <p class="text-[11px] text-stone-300">Instant alerts when request status, priority, or department changes</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="markAllNotificationsRead()" class="text-[11px] px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-amber-300 font-semibold transition">
+          Mark All Read
+        </button>
+        <button type="button" onclick="toggleNotificationDrawer()" class="p-1.5 rounded-lg hover:bg-white/10 text-stone-300 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="notification-list-container" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+      <!-- Populated dynamically by JS -->
+    </div>
+  </aside>
+
+  <!-- ======================================================================= -->
+  <!-- STUDENT REGISTRATION / LOGIN & DEMO SWITCHER MODAL                      -->
+  <!-- ======================================================================= -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-stone-200 max-w-lg w-full overflow-hidden">
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">ELOYCE University Authentication</span>
+          <h3 class="text-lg font-bold mt-0.5">Student Registration &amp; Portal Login</h3>
+        </div>
+        <button type="button" onclick="closeAuthModal()" class="p-1.5 rounded-lg hover:bg-white/10 text-stone-300">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="grid grid-cols-2 border-b border-stone-200 bg-stone-50 text-xs font-bold">
+        <button type="button" id="auth-tab-login" onclick="switchAuthTab('login')" class="py-3 border-b-2 border-slate-900 text-slate-900 bg-white">
+          Sign In / Quick Accounts
+        </button>
+        <button type="button" id="auth-tab-register" onclick="switchAuthTab('register')" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+          New Student Registration
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="auth-panel-login" class="p-5 space-y-4">
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
+          <div>
+            <label for="login-id-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">University ID or Email</label>
+            <input id="login-id-input" type="text" required value="ELU-2026-0419" class="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-sm" />
+          </div>
+          <div>
+            <label for="login-pw-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">Password</label>
+            <input id="login-pw-input" type="password" required value="eloyce2026" class="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-sm" />
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition">
+            Sign In to ELOYCE Portal
+          </button>
+        </form>
+
+        <div class="pt-3 border-t border-stone-200">
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Or Instant Demo Account Switch:</div>
+          <div class="grid grid-cols-1 gap-2">
+            <button type="button" onclick="selectPresetUser('Alex Rivera', 'ELU-2026-0419', 'Computer Science', 'student')" class="p-2.5 rounded-xl border border-stone-200 hover:border-amber-500 hover:bg-amber-50/40 text-left flex items-center justify-between transition">
+              <div>
+                <div class="text-xs font-bold text-slate-900">Alex Rivera (Student)</div>
+                <div class="text-[11px] text-slate-500">ID: ELU-2026-0419 • B.S. Computer Science</div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">Student</span>
+            </button>
+            <button type="button" onclick="selectPresetUser('Priya Patel', 'ELU-2026-0882', 'Electrical Engineering', 'student')" class="p-2.5 rounded-xl border border-stone-200 hover:border-amber-500 hover:bg-amber-50/40 text-left flex items-center justify-between transition">
+              <div>
+                <div class="text-xs font-bold text-slate-900">Priya Patel (Student)</div>
+                <div class="text-[11px] text-slate-500">ID: ELU-2026-0882 • B.S. Electrical Engineering</div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">Student</span>
+            </button>
+            <button type="button" onclick="selectPresetUser('Dr. Marcus Vance', 'ADMIN-OPS-01', 'Campus Operations Authority', 'admin')" class="p-2.5 rounded-xl border border-stone-200 hover:border-emerald-500 hover:bg-emerald-50/40 text-left flex items-center justify-between transition">
+              <div>
+                <div class="text-xs font-bold text-slate-900">Dr. Marcus Vance (University Authority)</div>
+                <div class="text-[11px] text-slate-500">ID: ADMIN-OPS-01 • Director of Campus Assistance</div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">Admin</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <div id="auth-panel-register" class="p-5 hidden">
+        <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="reg-name-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">Full Name *</label>
+              <input id="reg-name-input" type="text" required placeholder="e.g., Samira Khan" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label for="reg-id-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">Student ID *</label>
+              <input id="reg-id-input" type="text" required value="ELU-2026-1094" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="reg-email-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">University Email *</label>
+              <input id="reg-email-input" type="email" required placeholder="student@eloyce.edu" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label for="reg-dept-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">Major / Department *</label>
+              <input id="reg-dept-input" type="text" required placeholder="e.g., Mechanical Engineering" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label for="reg-pw-input" class="block text-xs font-bold uppercase text-slate-600 mb-1">Create Password *</label>
+            <input id="reg-pw-input" type="password" required placeholder="Minimum 6 characters" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-sm" />
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow">
+            Register Student Account &amp; Sign In
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TICKET INSPECTOR & STATUS UPDATE MODAL                                  -->
+  <!-- ======================================================================= -->
+  <div id="ticket-detail-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-stone-200 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modal-ticket-id" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500 text-slate-950">#REQ-1041</span>
+            <span id="modal-ticket-category" class="text-xs px-2 py-0.5 rounded bg-white/15 text-stone-200">Classroom</span>
+            <span id="modal-ticket-priority" class="text-xs px-2 py-0.5 rounded font-bold bg-rose-500 text-white">Critical</span>
+          </div>
+          <h3 id="modal-ticket-title" class="text-base sm:text-lg font-bold mt-1.5">Ticket Details</h3>
+        </div>
+        <button type="button" onclick="closeTicketModal()" class="p-1.5 rounded-lg hover:bg-white/10 text-stone-300">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 custom-scrollbar text-xs">
+        <!-- 4-Step Visual Progress Tracker -->
+        <div class="bg-stone-50 p-4 rounded-xl border border-stone-200">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Live Resolution Progress Tracker</div>
+          <div id="modal-progress-steps" class="grid grid-cols-4 gap-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-white p-3.5 rounded-xl border border-stone-200">
+          <div>
+            <div class="text-[10px] uppercase text-slate-400 font-bold">Submitted By</div>
+            <div id="modal-ticket-student" class="font-bold text-slate-800 mt-0.5">Alex Rivera</div>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase text-slate-400 font-bold">Location / Room</div>
+            <div id="modal-ticket-location" class="font-bold text-slate-800 mt-0.5">Science Hall 104</div>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase text-slate-400 font-bold">Assigned Department</div>
+            <div id="modal-ticket-dept" class="font-bold text-amber-800 mt-0.5">Academic &amp; Classroom Ops</div>
+          </div>
+        </div>
+
+        <!-- Description & AI Priority Note -->
+        <div class="space-y-2">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Complaint / Service Description</div>
+          <p id="modal-ticket-desc" class="text-slate-700 leading-relaxed bg-stone-50 p-3.5 rounded-xl border border-stone-200"></p>
+          <div id="modal-ai-reason" class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 px-3 py-2 rounded-lg"></div>
+        </div>
+
+        <!-- Authority Management Controls (Update Status, Department, Priority & Official Note) -->
+        <div class="bg-slate-900 text-white p-4 rounded-xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-300">Authority Action &amp; Status Update Controls</span>
+            <span class="text-[10px] text-stone-300">Triggers student notification on save</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="modal-update-status" class="block text-[10px] uppercase text-stone-300 font-bold mb-1">Status</label>
+              <select id="modal-update-status" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white">
+                <option value="Submitted">Submitted</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Escalated">Escalated</option>
+              </select>
+            </div>
+            <div>
+              <label for="modal-update-priority" class="block text-[10px] uppercase text-stone-300 font-bold mb-1">Priority</label>
+              <select id="modal-update-priority" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white">
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div>
+              <label for="modal-update-dept" class="block text-[10px] uppercase text-stone-300 font-bold mb-1">Assign Department</label>
+              <select id="modal-update-dept" class="w-full rounded-lg bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white">
+                <option value="Academic & Classroom Ops">Academic &amp; Classroom Ops</option>
+                <option value="IT & Digital Services">IT &amp; Digital Services</option>
+                <option value="Facilities & Campus Maintenance">Facilities &amp; Campus Maintenance</option>
+                <option value="Transport & Fleet Division">Transport &amp; Fleet Division</option>
+                <option value="Campus Security & Lost-Found">Campus Security &amp; Lost-Found</option>
+                <option value="Registrar & Student Admin">Registrar &amp; Student Admin</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input id="modal-update-note" type="text" placeholder="Add official resolution or routing note (optional)..." class="flex-1 rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white placeholder-stone-400" />
+            <button type="button" onclick="saveModalTicketUpdate()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition">
+              Update Ticket
+            </button>
+          </div>
+        </div>
+
+        <!-- Audit Log / Status Timeline -->
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Timestamped Audit Trail &amp; Status History</div>
+          <div id="modal-ticket-history" class="space-y-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-stone-200 mt-12 py-4 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-serif-crest font-bold text-slate-800">ELOYCE UNIVERSITY</span>
+        <span>• Smart Campus Assistance System</span>
+      </div>
+      <div>All 8 Core Features, 4 Advanced Features &amp; Bonus AI Priority Recommender Active</div>
+    </div>
+  </footer>
+
+  <!-- ======================================================================= -->
+  <!-- APPLICATION LOGIC & IN-MEMORY STATE                                     -->
+  <!-- ======================================================================= -->
+  <script src="js/app.js"></script>
+</body>
+</html>

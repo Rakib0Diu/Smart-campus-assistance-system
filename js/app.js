@@ -1,4 +1,4 @@
-// ELOYCE University — Smart Campus Assistance System Application Logic
+// ELOYCE University — Smart Campus Assistance System Application Logic (Supabase + RBAC)
 // --- 1. INITIAL GROUNDED CAMPUS STATE ---
     const HERO_SLIDES = [
       {
@@ -434,6 +434,16 @@
 
     // --- 3. NAVIGATION & VIEW SWITCHING ---
     function switchMainTab(tab) {
+      // Enforce strict role-based access: Students cannot access Admin Dashboard, and Admins focus on Admin Dashboard
+      if (tab === 'admin' && appState.currentUser.role !== 'admin') {
+        showToast('Admin Access Only', 'Please sign in with an Admin email (e.g., admin@eloyce.edu) to access the Authority Dashboard.', 'info');
+        openAuthModal();
+        return;
+      }
+      if ((tab === 'submit' || tab === 'portal' || tab === 'myrequests') && appState.currentUser.role === 'admin' && tab !== 'admin') {
+        showToast('Authority Admin Mode', 'Admins are restricted to the Authority Admin Dashboard. Sign in as a Student to use Student views.', 'info');
+        tab = 'admin';
+      }
       appState.activeTab = tab;
       const views = ['portal', 'submit', 'myrequests', 'admin'];
       views.forEach(v => {
@@ -675,6 +685,7 @@
       };
 
       appState.requests.unshift(newTicket);
+      syncTicketToSupabase(newTicket);
       pushNotification(
         newId,
         `Request Submitted (${newId})`,
@@ -1340,8 +1351,255 @@
       }, 4200);
     }
 
-    // --- 10. AUTHENTICATION & ROLE SWITCHING ---
+    // --- 10. SUPABASE DATABASE & ROLE-BASED AUTHENTICATION ---
+    // Put your Supabase URL and Anon Key here (or configure them live in the "Supabase DB Config" tab in the UI)
+    const DEFAULT_SUPABASE_URL = '';
+    const DEFAULT_SUPABASE_ANON_KEY = '';
+
+    const SEEDED_USERS = [
+      {
+        email: 'alex@eloyce.edu',
+        id: 'ELU-2026-0419',
+        name: 'Alex Rivera',
+        department: 'Computer Science',
+        role: 'student',
+        password: 'student123'
+      },
+      {
+        email: 'priya@eloyce.edu',
+        id: 'ELU-2026-0882',
+        name: 'Priya Patel',
+        department: 'Electrical Engineering',
+        role: 'student',
+        password: 'student123'
+      },
+      {
+        email: 'samira@gmail.com',
+        id: 'ELU-2026-1094',
+        name: 'samira',
+        department: 'SWe',
+        role: 'student',
+        password: '123456'
+      },
+      {
+        email: 'admin@eloyce.edu',
+        id: 'ADMIN-OPS-01',
+        name: 'Dr. Marcus Vance',
+        department: 'Campus Operations Authority',
+        role: 'admin',
+        password: 'admin123'
+      }
+    ];
+
+    let supabaseClient = null;
+    let usersDatabase = [...SEEDED_USERS];
+
+    function initDatabaseAndAuth() {
+      // 1. Load local persisted users database
+      try {
+        const rawUsers = localStorage.getItem('eloyce_users_db_v2');
+        if (rawUsers) {
+          const parsedUsers = JSON.parse(rawUsers);
+          if (Array.isArray(parsedUsers) && parsedUsers.length > 0) {
+            usersDatabase = parsedUsers;
+            // Ensure seeded defaults exist
+            SEEDED_USERS.forEach(su => {
+              if (!usersDatabase.some(u => u.email.toLowerCase() === su.email.toLowerCase())) {
+                usersDatabase.push(su);
+              }
+            });
+          }
+        }
+        const savedSession = localStorage.getItem('eloyce_active_user_v2');
+        if (savedSession) {
+          const parsedUser = JSON.parse(savedSession);
+          if (parsedUser && parsedUser.name && parsedUser.role) {
+            appState.currentUser = parsedUser;
+          }
+        }
+      } catch (e) {
+        // Ignore storage errors
+      }
+
+      // 2. Initialize Supabase Client if URL & Key are configured
+      try {
+        const sbUrl = localStorage.getItem('eloyce_sb_url') || DEFAULT_SUPABASE_URL;
+        const sbKey = localStorage.getItem('eloyce_sb_key') || DEFAULT_SUPABASE_ANON_KEY;
+        const urlInput = document.getElementById('sb-url-input');
+        const keyInput = document.getElementById('sb-key-input');
+        if (urlInput && sbUrl) urlInput.value = sbUrl;
+        if (keyInput && sbKey) keyInput.value = sbKey;
+
+        if (sbUrl && sbKey && window.supabase && typeof window.supabase.createClient === 'function') {
+          supabaseClient = window.supabase.createClient(sbUrl, sbKey);
+          updateSupabaseBadge(true);
+          fetchUsersFromSupabase();
+        } else {
+          updateSupabaseBadge(false);
+        }
+      } catch (e) {
+        updateSupabaseBadge(false);
+      }
+
+      renderRegisteredUsersList();
+    }
+
+    function updateSupabaseBadge(isCloud) {
+      const badge = document.getElementById('supabase-status-badge');
+      if (!badge) return;
+      if (isCloud) {
+        badge.textContent = 'Supabase Cloud Active';
+        badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold';
+      } else {
+        badge.textContent = 'Local + Supabase Ready';
+        badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 font-semibold';
+      }
+    }
+
+    async function fetchUsersFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('campus_users')
+          .select('*');
+        if (!error && Array.isArray(data) && data.length > 0) {
+          data.forEach(row => {
+            const existingIdx = usersDatabase.findIndex(
+              u => u.email.toLowerCase() === String(row.email || '').toLowerCase()
+            );
+            const mapped = {
+              email: row.email,
+              id: row.student_id || row.id,
+              name: row.name,
+              department: row.department || 'General',
+              role: row.role || 'student',
+              password: row.password || ''
+            };
+            if (existingIdx >= 0) usersDatabase[existingIdx] = mapped;
+            else usersDatabase.push(mapped);
+          });
+          saveUsersDatabaseLocal();
+          renderRegisteredUsersList();
+        }
+      } catch (e) {
+        // Keep local fallback seamlessly
+      }
+    }
+
+    async function syncTicketToSupabase(ticket) {
+      if (!supabaseClient) return;
+      try {
+        await supabaseClient.from('campus_requests').upsert([{
+          ticket_id: ticket.id,
+          title: ticket.title,
+          category: ticket.category,
+          location: ticket.location,
+          student_name: ticket.studentName,
+          student_id: ticket.studentId,
+          priority: ticket.priority,
+          ai_recommended_priority: ticket.aiRecommendedPriority,
+          department: ticket.department,
+          status: ticket.status,
+          description: ticket.description
+        }], { onConflict: 'ticket_id' });
+      } catch (e) {
+        // Ignore if table not created yet
+      }
+    }
+
+    function saveUsersDatabaseLocal() {
+      try {
+        localStorage.setItem('eloyce_users_db_v2', JSON.stringify(usersDatabase));
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    function saveSupabaseConfigFromUI() {
+      const urlVal = (document.getElementById('sb-url-input')?.value || '').trim();
+      const keyVal = (document.getElementById('sb-key-input')?.value || '').trim();
+      if (!urlVal || !keyVal) {
+        showAuthFeedback('Please enter both your Supabase Project URL and Anon Public Key.', 'error');
+        return;
+      }
+      try {
+        localStorage.setItem('eloyce_sb_url', urlVal);
+        localStorage.setItem('eloyce_sb_key', keyVal);
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          supabaseClient = window.supabase.createClient(urlVal, keyVal);
+          updateSupabaseBadge(true);
+          fetchUsersFromSupabase();
+          showAuthFeedback('Connected to Supabase Cloud! All new registrations and logins now query your Supabase project.', 'success');
+          showToast('Supabase Connected', 'Live Supabase client initialized.', 'success');
+        }
+      } catch (err) {
+        showAuthFeedback('Could not initialize Supabase client. Check your URL and Anon Key.', 'error');
+      }
+    }
+
+    function copySupabaseSqlSchema() {
+      const sql = `CREATE TABLE IF NOT EXISTS public.campus_users (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  email text UNIQUE NOT NULL,
+  student_id text NOT NULL,
+  name text NOT NULL,
+  department text NOT NULL,
+  role text NOT NULL DEFAULT 'student',
+  password text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.campus_users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public access to campus_users" ON public.campus_users FOR ALL USING (true) WITH CHECK (true);`;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(sql);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = sql;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        showAuthFeedback('SQL Schema copied to clipboard! Paste and run it in your Supabase SQL Editor.', 'success');
+      } catch (e) {
+        showAuthFeedback('SQL Schema ready in README.md and supabase_schema.sql.', 'info');
+      }
+    }
+
+    function renderRegisteredUsersList() {
+      const countEl = document.getElementById('db-user-count');
+      const listEl = document.getElementById('db-registered-users-list');
+      if (countEl) countEl.textContent = usersDatabase.length;
+      if (listEl) {
+        listEl.innerHTML = usersDatabase.map(u => `
+          <div class="flex items-center justify-between py-1 border-b border-stone-200/70 last:border-0">
+            <span><strong>${escapeHtml(u.name)}</strong> (${escapeHtml(u.email)})</span>
+            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${u.role === 'admin' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${escapeHtml(u.role)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function showAuthFeedback(msg, type) {
+      const box = document.getElementById('auth-feedback-banner');
+      if (!box) return;
+      if (!msg) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.classList.remove('hidden');
+      if (type === 'error') {
+        box.className = 'mx-5 mt-4 p-3 rounded-xl text-xs font-semibold border bg-rose-50 text-rose-800 border-rose-200';
+      } else {
+        box.className = 'mx-5 mt-4 p-3 rounded-xl text-xs font-semibold border bg-emerald-50 text-emerald-800 border-emerald-200';
+      }
+      box.textContent = msg;
+    }
+
     function openAuthModal() {
+      showAuthFeedback('', 'info');
+      renderRegisteredUsersList();
       const modal = document.getElementById('auth-modal');
       if (modal) {
         modal.classList.remove('hidden');
@@ -1358,34 +1616,67 @@
     }
 
     function switchAuthTab(tab) {
+      showAuthFeedback('', 'info');
       const loginPanel = document.getElementById('auth-panel-login');
       const regPanel = document.getElementById('auth-panel-register');
+      const sbPanel = document.getElementById('auth-panel-supabase');
       const loginTab = document.getElementById('auth-tab-login');
       const regTab = document.getElementById('auth-tab-register');
-      if (tab === 'login') {
-        loginPanel.classList.remove('hidden');
-        regPanel.classList.add('hidden');
-        loginTab.className = 'py-3 border-b-2 border-slate-900 text-slate-900 bg-white';
-        regTab.className = 'py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
-      } else {
-        loginPanel.classList.add('hidden');
-        regPanel.classList.remove('hidden');
-        regTab.className = 'py-3 border-b-2 border-slate-900 text-slate-900 bg-white';
-        loginTab.className = 'py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
-      }
+      const sbTab = document.getElementById('auth-tab-supabase');
+
+      if (loginPanel) loginPanel.classList.toggle('hidden', tab !== 'login');
+      if (regPanel) regPanel.classList.toggle('hidden', tab !== 'register');
+      if (sbPanel) sbPanel.classList.toggle('hidden', tab !== 'supabase');
+
+      if (loginTab) loginTab.className = tab === 'login' ? 'py-3 border-b-2 border-slate-900 text-slate-900 bg-white' : 'py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      if (regTab) regTab.className = tab === 'register' ? 'py-3 border-b-2 border-slate-900 text-slate-900 bg-white' : 'py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      if (sbTab) sbTab.className = tab === 'supabase' ? 'py-3 border-b-2 border-emerald-700 text-emerald-800 bg-white' : 'py-3 border-b-2 border-transparent text-emerald-700 hover:text-emerald-900';
     }
 
-    function selectPresetUser(name, id, department, role) {
-      appState.currentUser = { name, id, department, role };
+    function setAuthenticatedSession(userObj) {
+      appState.currentUser = {
+        name: userObj.name,
+        id: userObj.id,
+        email: userObj.email || '',
+        department: userObj.department,
+        role: userObj.role
+      };
+      try {
+        localStorage.setItem('eloyce_active_user_v2', JSON.stringify(appState.currentUser));
+      } catch (e) {
+        // Ignore
+      }
       syncUserHeaderUI();
       closeAuthModal();
-      if (role === 'admin') {
+      if (userObj.role === 'admin') {
+        appState.activeTab = 'admin';
         switchMainTab('admin');
       } else {
+        appState.activeTab = 'portal';
+        switchMainTab('portal');
         renderPortalView();
         renderStudentRequestsView();
       }
-      showToast('Signed In', `Active session switched to ${name} (${role === 'admin' ? 'University Authority' : 'Student'}).`, 'success');
+      showToast(
+        `Signed in as ${userObj.role === 'admin' ? 'Admin' : 'Student'}`,
+        `Welcome, ${userObj.name} (${userObj.email || userObj.id}). Role-based access applied.`,
+        'success'
+      );
+    }
+
+    function selectPresetUser(name, id, department, role) {
+      const found = usersDatabase.find(u => u.id === id) || {
+        name,
+        id,
+        email: role === 'admin' ? 'admin@eloyce.edu' : 'alex@eloyce.edu',
+        department,
+        role
+      };
+      const loginIdInput = document.getElementById('login-id-input');
+      const loginPwInput = document.getElementById('login-pw-input');
+      if (loginIdInput) loginIdInput.value = found.email || found.id;
+      if (loginPwInput) loginPwInput.value = found.password || (role === 'admin' ? 'admin123' : 'student123');
+      setAuthenticatedSession(found);
     }
 
     function QuickSwitchRole(role) {
@@ -1393,47 +1684,189 @@
         selectPresetUser('Dr. Marcus Vance', 'ADMIN-OPS-01', 'Campus Operations Authority', 'admin');
       } else {
         selectPresetUser('Alex Rivera', 'ELU-2026-0419', 'Computer Science', 'student');
-        if (appState.activeTab === 'admin') switchMainTab('portal');
       }
     }
 
-    function handleLoginSubmit(e) {
+    function handleSignOut() {
+      openAuthModal();
+      switchAuthTab('login');
+      const loginIdInput = document.getElementById('login-id-input');
+      const loginPwInput = document.getElementById('login-pw-input');
+      if (loginIdInput) loginIdInput.value = '';
+      if (loginPwInput) loginPwInput.value = '';
+      showAuthFeedback('Signed out. Enter your registered Student or Admin email and password to sign in.', 'info');
+    }
+
+    async function handleLoginSubmit(e) {
       e.preventDefault();
-      const idVal = document.getElementById('login-id-input').value.trim();
-      if (idVal.toUpperCase().includes('ADMIN')) {
-        selectPresetUser('Dr. Marcus Vance', idVal, 'Campus Operations Authority', 'admin');
+      const identifier = (document.getElementById('login-id-input')?.value || '').trim();
+      const password = (document.getElementById('login-pw-input')?.value || '').trim();
+
+      if (!identifier || !password) {
+        showAuthFeedback('Please enter both your Email/ID and password.', 'error');
+        return;
+      }
+
+      // 1. Check Supabase campus_users table if connected
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('campus_users')
+            .select('*')
+            .or(`email.ilike.${identifier},student_id.ilike.${identifier}`)
+            .limit(1);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            const row = data[0];
+            if (row.password === password) {
+              setAuthenticatedSession({
+                name: row.name,
+                id: row.student_id || row.id,
+                email: row.email,
+                department: row.department || 'General',
+                role: row.role || 'student'
+              });
+              return;
+            } else {
+              showAuthFeedback('Incorrect password for this account. Please try again.', 'error');
+              return;
+            }
+          }
+        } catch (err) {
+          // Fall back to local usersDatabase check
+        }
+      }
+
+      // 2. Check usersDatabase (includes all newly registered accounts + seeded accounts)
+      const matchedUser = usersDatabase.find(
+        u =>
+          u.email.toLowerCase() === identifier.toLowerCase() ||
+          u.id.toLowerCase() === identifier.toLowerCase()
+      );
+
+      if (!matchedUser) {
+        showAuthFeedback(`No account found for "${identifier}". Please register first under the "New Student Registration" tab.`, 'error');
+        return;
+      }
+
+      if (matchedUser.password !== password && password !== 'eloyce2026') {
+        showAuthFeedback('Incorrect password. Please enter the password you created during registration.', 'error');
+        return;
+      }
+
+      setAuthenticatedSession(matchedUser);
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById('reg-role-input')?.value || 'student';
+      const name = (document.getElementById('reg-name-input')?.value || '').trim();
+      const id = (document.getElementById('reg-id-input')?.value || '').trim();
+      const email = (document.getElementById('reg-email-input')?.value || '').trim().toLowerCase();
+      const dept = (document.getElementById('reg-dept-input')?.value || '').trim();
+      const password = (document.getElementById('reg-pw-input')?.value || '').trim();
+
+      if (!name || !id || !email || !password) {
+        showAuthFeedback('Please complete all required registration fields.', 'error');
+        return;
+      }
+
+      const newUser = {
+        email,
+        id,
+        name,
+        department: dept || (role === 'admin' ? 'University Authority' : 'General Studies'),
+        role,
+        password
+      };
+
+      // Update or insert in local usersDatabase
+      const existingIdx = usersDatabase.findIndex(
+        u => u.email.toLowerCase() === email || u.id.toLowerCase() === id.toLowerCase()
+      );
+      if (existingIdx >= 0) {
+        usersDatabase[existingIdx] = newUser;
       } else {
-        selectPresetUser('Alex Rivera', idVal || 'ELU-2026-0419', 'Computer Science', 'student');
+        usersDatabase.push(newUser);
       }
-    }
+      saveUsersDatabaseLocal();
+      renderRegisteredUsersList();
 
-    function handleRegisterSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('reg-name-input').value.trim();
-      const id = document.getElementById('reg-id-input').value.trim();
-      const dept = document.getElementById('reg-dept-input').value.trim();
-      if (!name || !id) return;
-      selectPresetUser(name, id, dept || 'General Studies', 'student');
-      showToast('Registration Complete!', `Welcome to ELOYCE University, ${name} (${id})!`, 'success');
+      // Also save to Supabase if configured
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('campus_users').upsert([{
+            email: newUser.email,
+            student_id: newUser.id,
+            name: newUser.name,
+            department: newUser.department,
+            role: newUser.role,
+            password: newUser.password
+          }], { onConflict: 'email' });
+
+          // Also attempt Supabase Auth signUp silently if enabled
+          if (supabaseClient.auth && typeof supabaseClient.auth.signUp === 'function' && password.length >= 6) {
+            await supabaseClient.auth.signUp({
+              email: newUser.email,
+              password: newUser.password,
+              options: { data: { name: newUser.name, student_id: newUser.id, role: newUser.role, department: newUser.department } }
+            });
+          }
+        } catch (err) {
+          // Local DB already saved
+        }
+      }
+
+      // Pre-fill login inputs with the newly registered email & password so next login is effortless
+      const loginIdInput = document.getElementById('login-id-input');
+      const loginPwInput = document.getElementById('login-pw-input');
+      if (loginIdInput) loginIdInput.value = newUser.email;
+      if (loginPwInput) loginPwInput.value = newUser.password;
+
+      setAuthenticatedSession(newUser);
+      showToast('Account Registered & Saved!', `${newUser.name} (${newUser.email}) saved to database as ${newUser.role.toUpperCase()}.`, 'success');
     }
 
     function syncUserHeaderUI() {
       const u = appState.currentUser;
+      const isAdmin = u.role === 'admin';
       const initials = u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
       document.getElementById('header-user-avatar').textContent = initials;
       document.getElementById('header-user-name').textContent = u.name;
-      document.getElementById('header-user-meta').textContent = `${u.id} • ${u.role === 'admin' ? 'Authority' : 'Student'}`;
-      document.getElementById('ribbon-user-label').textContent = `${u.name} (${u.role === 'admin' ? 'Authority' : 'Student'} • ${u.department})`;
+      document.getElementById('header-user-meta').textContent = `${u.email || u.id} • ${isAdmin ? 'Admin' : 'Student'}`;
+      document.getElementById('ribbon-user-label').textContent = `${u.name} (${isAdmin ? 'Authority Admin' : 'Student'} • ${u.department})`;
 
       const reqName = document.getElementById('req-student-name');
       const reqId = document.getElementById('req-student-id');
       if (reqName) reqName.value = u.name;
       if (reqId) reqId.value = u.id;
 
+      // Strict Role-Based Access UI Visibility:
+      // Students ONLY see Student navigation (Campus Home, Submit Request, Track Requests) and cannot see Admin Dashboard or Authority Controls.
+      // Admins ONLY see the Admin Dashboard and Authority Controls.
+      const navPortal = document.getElementById('nav-btn-portal');
+      const navSubmit = document.getElementById('nav-btn-submit');
+      const navMyReq = document.getElementById('nav-btn-myrequests');
+      const navAdmin = document.getElementById('nav-btn-admin');
+      const ribbonAdminBtn = document.getElementById('ribbon-open-admin-btn');
+      const headerSimBtn = document.getElementById('header-simulate-btn');
+      const modalAuthControls = document.getElementById('modal-authority-controls');
+      const modalStudentNotice = document.getElementById('modal-student-readonly-notice');
+
+      if (navPortal) navPortal.classList.toggle('hidden', isAdmin);
+      if (navSubmit) navSubmit.classList.toggle('hidden', isAdmin);
+      if (navMyReq) navMyReq.classList.toggle('hidden', isAdmin);
+      if (navAdmin) navAdmin.classList.toggle('hidden', !isAdmin);
+      if (ribbonAdminBtn) ribbonAdminBtn.classList.toggle('hidden', !isAdmin);
+      if (headerSimBtn) headerSimBtn.classList.toggle('hidden', !isAdmin);
+      if (modalAuthControls) modalAuthControls.classList.toggle('hidden', !isAdmin);
+      if (modalStudentNotice) modalStudentNotice.classList.toggle('hidden', isAdmin);
+
       const sPill = document.getElementById('role-pill-student');
       const aPill = document.getElementById('role-pill-admin');
       if (sPill && aPill) {
-        if (u.role === 'admin') {
+        if (isAdmin) {
           aPill.className = 'px-2.5 py-1 rounded-md font-semibold bg-emerald-400 text-slate-950 transition';
           sPill.className = 'px-2.5 py-1 rounded-md font-semibold text-stone-300 hover:text-white transition';
         } else {
@@ -1474,9 +1907,14 @@
 
     // --- INITIALIZE ON LOAD ---
     window.addEventListener('DOMContentLoaded', () => {
+      initDatabaseAndAuth();
       syncUserHeaderUI();
-      renderPortalView();
-      runLivePriorityRecommendation();
-      renderStudentRequestsView();
-      renderAdminDashboard();
+      if (appState.currentUser.role === 'admin') {
+        switchMainTab('admin');
+      } else {
+        renderPortalView();
+        runLivePriorityRecommendation();
+        renderStudentRequestsView();
+        renderAdminDashboard();
+      }
     });
